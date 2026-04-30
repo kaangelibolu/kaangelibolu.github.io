@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hareketin Temel Kavramları</title>
+
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .screen {
+      width: min(100%, 900px);
+      min-height: 70vh;
+      background: var(--card);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .content {
+      width: 100%;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 24px;
+      font-size: clamp(2rem, 5vw, 3rem);
+    }
+
+    .play-button,
+    .level-button,
+    .ok-button,
+    .back-button,
+    .start-button {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: 0.15s;
+      margin-top: 10px;
+    }
+
+    .play-button:hover,
+    .level-button:hover,
+    .ok-button:hover,
+    .back-button:hover,
+    .start-button:hover {
+      background: var(--accent-hover);
+    }
+
+    .levels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 16px;
+      text-align: center;
+      width: min(90%, 320px);
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 20px;
+      width: 100%;
+      max-width: 420px;
+      margin-inline: auto;
+    }
+
+    .choice {
+      background: #eef2ff;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.15s;
+      border: 2px solid transparent;
+    }
+
+    .choice:hover {
+      background: #dbeafe;
+      border-color: #93c5fd;
+    }
+
+    .map-area {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      height: 420px;
+      margin: 0 auto 24px;
+      border: 2px solid #dbeafe;
+      border-radius: 16px;
+      background: #f8fbff;
+      overflow: hidden;
+    }
+
+    .building {
+      position: absolute;
+      width: 90px;
+      height: 50px;
+      border: 3px solid #111827;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      border-radius: 4px;
+    }
+
+    .house {
+      left: 70px;
+      bottom: 60px;
+    }
+
+    .market {
+      left: 70px;
+      top: 60px;
+    }
+
+    .barber {
+      left: 320px;
+      top: 60px;
+    }
+
+    .vertical-road {
+      position: absolute;
+      left: 113px;
+      top: 110px;
+      width: 4px;
+      height: 200px;
+      background: black;
+    }
+
+    .horizontal-road {
+      position: absolute;
+      left: 160px;
+      top: 83px;
+      width: 160px;
+      height: 4px;
+      background: black;
+    }
+
+    .distance-vertical {
+      position: absolute;
+      left: 130px;
+      top: 190px;
+      font-weight: bold;
+    }
+
+    .distance-horizontal {
+      position: absolute;
+      left: 210px;
+      top: 40px;
+      font-weight: bold;
+    }
+
+    .stickman {
+      position: absolute;
+      left: 25px;
+      bottom: 70px;
+      width: 40px;
+      height: 90px;
+      transition:
+        left 2s linear,
+        bottom 2s linear;
+    }
+
+    .head {
+      width: 24px;
+      height: 24px;
+      border: 3px solid black;
+      border-radius: 50%;
+      margin: 0 auto;
+    }
+
+    .body {
+      width: 3px;
+      height: 30px;
+      background: black;
+      margin: 0 auto;
+    }
+
+    .arms {
+      position: relative;
+      width: 30px;
+      height: 3px;
+      background: black;
+      margin: -20px auto 0;
+      transform: rotate(20deg);
+    }
+
+    .legs {
+      position: relative;
+      width: 30px;
+      height: 30px;
+      margin: 8px auto 0;
+    }
+
+    .legs::before,
+    .legs::after {
+      content: "";
+      position: absolute;
+      width: 3px;
+      height: 30px;
+      background: black;
+      top: 0;
+    }
+
+    .legs::before {
+      left: 8px;
+      transform: rotate(25deg);
+    }
+
+    .legs::after {
+      right: 8px;
+      transform: rotate(-25deg);
+    }
+
+    .number-line {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      top: 210px;
+      height: 4px;
+      background: black;
+    }
+
+    .number-point {
+      position: absolute;
+      top: 202px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: black;
+    }
+
+    .point-minus50 {
+      left: 30px;
+    }
+
+    .point-0 {
+      left: 150px;
+    }
+
+    .point-50 {
+      left: 270px;
+    }
+
+    .point-100 {
+      left: 390px;
+    }
+
+    .number-label {
+      position: absolute;
+      top: 230px;
+      font-weight: bold;
+    }
+
+    .label-minus50 {
+      left: 18px;
+    }
+
+    .label-0 {
+      left: 155px;
+    }
+
+    .label-50 {
+      left: 265px;
+    }
+
+    .label-100 {
+      left: 378px;
+    }
+
+    .horse {
+      position: absolute;
+      left: 150px;
+      top: 130px;
+      width: 70px;
+      height: 60px;
+      transition: left 2s linear;
+    }
+
+    .horse-body {
+      position: absolute;
+      width: 45px;
+      height: 22px;
+      background: #92400e;
+      border-radius: 8px;
+      left: 10px;
+      top: 18px;
+    }
+
+    .horse-head {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #92400e;
+      border-radius: 6px;
+      left: 48px;
+      top: 10px;
+    }
+
+    .horse-leg {
+      position: absolute;
+      width: 4px;
+      height: 24px;
+      background: black;
+      top: 38px;
+    }
+
+    .leg1 {
+      left: 14px;
+    }
+
+    .leg2 {
+      left: 26px;
+    }
+
+    .leg3 {
+      left: 42px;
+    }
+
+    .leg4 {
+      left: 54px;
+    }
+
+    .start-button {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+    }
+
+    @media (max-width: 700px) {
+
+      .map-area {
+        transform: scale(0.9);
+        transform-origin: top center;
+      }
+
+      .screen {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main id="menu" class="screen">
+    <div class="content">
+
+      <h1>Hareketin Temel Kavramları</h1>
+
+      <button class="play-button">
+        Oyna
+      </button>
+
+    </div>
+  </main>
+
+  <main id="levels" class="screen hidden">
+    <div class="content">
+
+      <h1>Bölümler</h1>
+
+      <div class="levels" id="levelsContainer"></div>
+
+    </div>
+  </main>
+
+  <main id="levelPage" class="screen hidden">
+    <div class="content" id="levelContent">
+
+      <h1 id="levelTitle"></h1>
+
+    </div>
+  </main>
+
+  <div id="modal" class="modal hidden">
+
+    <div class="modal-content">
+
+      <p id="modalText"></p>
+
+      <div id="modalButtons">
+
+        <button class="ok-button">
+          Tamam
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const playButton =
+      document.querySelector('.play-button');
+
+    const menu =
+      document.getElementById('menu');
+
+    const levels =
+      document.getElementById('levels');
+
+    const levelPage =
+      document.getElementById('levelPage');
+
+    const levelsContainer =
+      document.getElementById('levelsContainer');
+
+    const modal =
+      document.getElementById('modal');
+
+    const modalText =
+      document.getElementById('modalText');
+
+    const modalButtons =
+      document.getElementById('modalButtons');
+
+    const levelTitle =
+      document.getElementById('levelTitle');
+
+    const levelContent =
+      document.getElementById('levelContent');
+
+    const completedLevels = new Set();
+
+    const levelsData = [
+
+      {
+        name: "Konum",
+        message:
+        "Konum, bir cismin bulunduğu yeri ifade eder."
+      },
+
+      {
+        name: "Alınan Yol",
+        message:
+        "Alınan yol, hareket sırasında gidilen toplam mesafedir."
+      },
+
+      {
+        name: "Yer Değiştirme",
+        message:
+        "Yer değiştirme, başlangıç ve bitiş noktası arasındaki yönlü farktır."
+      },
+
+      {
+        name: "Sürat",
+        message:
+        "Sürat, birim zamanda alınan yoldur."
+      },
+
+      {
+        name: "Hız",
+        message:
+        "Hız, süratin yönlü halidir."
+      },
+
+      {
+        name: "İvme",
+        message:
+        "Hızın zamana göre değişim oranıdır."
+      }
+
+    ];
+
+    playButton.addEventListener('click', () => {
+
+      menu.classList.add('hidden');
+
+      levels.classList.remove('hidden');
+
+    });
+
+    function renderLevels() {
+
+      levelsContainer.innerHTML = '';
+
+      levelsData.forEach(level => {
+
+        const btn =
+          document.createElement('button');
+
+        btn.className = 'level-button';
+
+        btn.textContent =
+          level.name +
+          (completedLevels.has(level.name)
+            ? ' ✓'
+            : '');
+
+        btn.addEventListener(
+          'click',
+          () => openLevel(level)
+        );
+
+        levelsContainer.appendChild(btn);
+
+      });
+
+    }
+
+    function openLevel(level) {
+
+      levels.classList.add('hidden');
+
+      levelPage.classList.remove('hidden');
+
+      levelTitle.textContent = level.name;
+
+      levelContent.innerHTML =
+        `<h1>${level.name}</h1>`;
+
+      if (level.name === "Konum") {
+
+        levelContent.innerHTML += `
+
+          <p>
+            Anıtı referans noktası kabul ederek
+            bankın yerini tarif edin.
+          </p>
+
+          <div class="choices">
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              a) Anıttan 10m güney
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              b) Tuna'dan 8m doğu
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="true">
+
+              c) Anıttan 10m kuzey
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              d) Anıttan 8m batı
+
+            </div>
+
+          </div>
+        `;
+
+        setupChoices(level);
+      }
+
+      if (level.name === "Alınan Yol") {
+
+        levelContent.innerHTML += `
+
+          <div class="map-area">
+
+            <div class="building house">
+              Ev
+            </div>
+
+            <div class="building market">
+              Bakkal
+            </div>
+
+            <div class="building barber">
+              Berber
+            </div>
+
+            <div class="vertical-road"></div>
+
+            <div class="horizontal-road"></div>
+
+            <div class="distance-vertical">
+              200 m
+            </div>
+
+            <div class="distance-horizontal">
+              500 m
+            </div>
+
+            <div
+              class="stickman"
+              id="stickman">
+
+              <div class="head"></div>
+
+              <div class="body"></div>
+
+              <div class="arms"></div>
+
+              <div class="legs"></div>
+
+            </div>
+
+            <button
+              class="start-button"
+              id="startButton">
+
+              Başla
+
+            </button>
+
+          </div>
+
+          <p>
+            Mehmet'in aldığı yol kaç metredir?
+          </p>
+
+          <div class="choices">
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              a) 200m
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="true">
+
+              b) 1400m
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              c) 700m
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              d) Yol almamıştır
+
+            </div>
+
+          </div>
+        `;
+
+        const stickman =
+          document.getElementById('stickman');
+
+        const startButton =
+          document.getElementById('startButton');
+
+        startButton.addEventListener(
+          'click',
+          async () => {
+
+            stickman.style.left = '25px';
+            stickman.style.bottom = '70px';
+
+            await wait(50);
+
+            stickman.style.left = '70px';
+            stickman.style.bottom = '250px';
+
+            await wait(2000);
+
+            stickman.style.left = '320px';
+            stickman.style.bottom = '250px';
+
+            await wait(2000);
+
+            stickman.style.left = '70px';
+            stickman.style.bottom = '250px';
+
+            await wait(2000);
+
+            stickman.style.left = '25px';
+            stickman.style.bottom = '70px';
+
+          }
+        );
+
+        setupChoices(level);
+      }
+
+      if (level.name === "Yer Değiştirme") {
+
+        levelContent.innerHTML += `
+
+          <div class="map-area">
+
+            <div class="number-line"></div>
+
+            <div class="number-point point-minus50"></div>
+            <div class="number-point point-0"></div>
+            <div class="number-point point-50"></div>
+            <div class="number-point point-100"></div>
+
+            <div class="number-label label-minus50">
+              -50
+            </div>
+
+            <div class="number-label label-0">
+              0
+            </div>
+
+            <div class="number-label label-50">
+              50
+            </div>
+
+            <div class="number-label label-100">
+              100
+            </div>
+
+            <div
+              class="horse"
+              id="horse">
+
+              <div class="horse-body"></div>
+
+              <div class="horse-head"></div>
+
+              <div class="horse-leg leg1"></div>
+              <div class="horse-leg leg2"></div>
+              <div class="horse-leg leg3"></div>
+              <div class="horse-leg leg4"></div>
+
+            </div>
+
+            <button
+              class="start-button"
+              id="horseButton">
+
+              Başla
+
+            </button>
+
+          </div>
+
+          <p>
+            Atın yaptığı yer değiştirme kaç m'dir?
+          </p>
+
+          <div class="choices">
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              a) 150m
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              b) 100m
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="false">
+
+              c) 0m
+
+            </div>
+
+            <div
+              class="choice"
+              data-correct="true">
+
+              d) -50m
+
+            </div>
+
+          </div>
+        `;
+
+        const horse =
+          document.getElementById('horse');
+
+        const horseButton =
+          document.getElementById('horseButton');
+
+        horseButton.addEventListener(
+          'click',
+          async () => {
+
+            horse.style.transition = 'none';
+            horse.style.left = '150px';
+
+            await wait(50);
+
+            horse.style.transition = 'left 2s linear';
+
+            horse.style.left = '390px';
+
+            await wait(2000);
+
+            horse.style.left = '20px';
+
+          }
+        );
+
+        setupChoices(level);
+      }
+
+      modalText.textContent = level.message;
+
+      modalButtons.innerHTML = `
+        <button class="ok-button">
+          Tamam
+        </button>
+      `;
+
+      modalButtons
+        .querySelector('.ok-button')
+        .onclick = () => {
+
+          modal.classList.add('hidden');
+
+        };
+
+      modal.classList.remove('hidden');
+
+    }
+
+    function setupChoices(level) {
+
+      document
+        .querySelectorAll('.choice')
+        .forEach(choice => {
+
+          choice.addEventListener(
+            'click',
+            () => {
+
+              const isCorrect =
+                choice.dataset.correct === 'true';
+
+              if (isCorrect) {
+
+                modalText.textContent =
+                  'Doğru cevap';
+
+                modalButtons.innerHTML = `
+                  <button class="back-button">
+                    Geri
+                  </button>
+                `;
+
+                modalButtons
+                  .querySelector('.back-button')
+                  .onclick = () => {
+
+                    completedLevels.add(level.name);
+
+                    modal.classList.add('hidden');
+
+                    levelPage.classList.add('hidden');
+
+                    levels.classList.remove('hidden');
+
+                    renderLevels();
+
+                  };
+
+              } else {
+
+                modalText.textContent =
+                  'Yanlış cevap';
+
+                modalButtons.innerHTML = `
+                  <button class="ok-button">
+                    Tamam
+                  </button>
+                `;
+
+                modalButtons
+                  .querySelector('.ok-button')
+                  .onclick = () => {
+
+                    modal.classList.add('hidden');
+
+                  };
+              }
+
+              modal.classList.remove('hidden');
+
+            }
+          );
+
+        });
+
+    }
+
+    function wait(ms) {
+
+      return new Promise(resolve => {
+
+        setTimeout(resolve, ms);
+
+      });
+
+    }
+
+    renderLevels();
+  </script>
+
+</body>
+</html>
